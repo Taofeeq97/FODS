@@ -15,17 +15,17 @@ import os
 from datetime import timedelta
 import dotenv
 import dj_database_url
-dotenv.load_dotenv()
 
+dotenv.load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-DATABASE_URL= os.getenv('DATABASE_URL')
+DATABASE_URL = os.getenv('DATABASE_URL')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY =os.getenv('SECRET_KEY')
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -67,12 +67,10 @@ MIDDLEWARE = [
 AUTH_USER_MODEL = 'accounts.CustomUser'
 ROOT_URLCONF = 'FODS.urls'
 
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
-
 
 }
 
@@ -82,9 +80,7 @@ ELASTICSEARCH_DSL = {
         'http_auth': (os.getenv('ELASTICSEARCH_HTTP_AUTH_USERNAME'), os.getenv('ELASTICSEARCH_HTTP_AUTH_PASSWORD')),
     },
 
-
 }
-
 
 ELASTICSEARCH_INDEX_NAMES = {
     'Orders.Food': 'search_index',
@@ -162,7 +158,7 @@ WSGI_APPLICATION = 'FODS.wsgi.application'
 #     }
 # }
 
-DATABASES={
+DATABASES = {
     'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=1800)
 }
 
