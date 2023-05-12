@@ -82,6 +82,9 @@ ELASTICSEARCH_DSL = {
 
 }
 
+
+CSRF_TRUSTED_ORIGINS = ['https://web-production-0d7a.up.railway.app/']
+
 ELASTICSEARCH_INDEX_NAMES = {
     'Orders.Food': 'search_index',
 }
