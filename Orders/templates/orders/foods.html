@@ -1,0 +1,67 @@
+
+{% extends 'main.html' %}
+{% load static %}
+{% block content%}
+
+
+<main class="projects">
+    <section class="hero-section text-center" style="background-image: url('{% static 'images/bg.jpg' %}');">
+      <div class="container container--narrow">
+        <div class="hero-section__box">
+          <h2>Search for <span>foods</span></h2>
+        </div>
+
+        <div class="hero-section__search">
+          <form id="searchForm" class="form" action="" method="get">
+            <div class="form__field">
+              <label for="formInput#search">Search By Foods </label>
+              <input class="input input--text" id="formInput#search" type="text" name="search_query" value="{{search_query}}"
+                placeholder="Search by food name" />
+            </div>
+
+            <input class="btn btn--sub btn--lg" type="submit" value="Search" />
+          </form>
+        </div>
+      </div>
+    </section>
+    <!-- Search Result: DevList -->
+    <section class="projectsList"   >
+        {% if foods %}
+      <div class="container">
+        <div class="grid grid--three">
+            {% for food in foods %}
+          <div class="column">
+            <div class="card project">
+              <a href="{{food.get_absolute_url}}" class="project">
+                  <img class="project__thumbnail" src="{{food.picture.url}}" alt="project thumbnail" style="width:350px; height:200px;" />
+                <div class="card__body">
+
+
+                  <h3 class="project__title">{{food.name}}</h3>
+                  <p><a class="project__author" href="">&#8358; {{food.price}}</a></p>
+
+
+                  <p class="project--rating">
+                  </p>
+                  <div class="project__tags">
+                      {% for tag in food.tags.all %}
+                    <span class="tag tag--pill tag--main">
+                      <small>{{tag}}</small>
+
+                    </span>
+                    {% endfor %}
+                  </div>
+                </div>
+              </a>
+            </div>
+          </div>
+            {% endfor %}
+        </div>
+      </div>
+        {% else %}
+        <p>Food with the search query is not available for now</p>
+        {% endif %}
+    </section>
+  </main>
+
+{% endblock content%}

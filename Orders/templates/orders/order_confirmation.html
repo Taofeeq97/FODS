@@ -1,0 +1,9 @@
+{% extends 'main.html' %}
+
+{% block content %}
+  <div class="container">
+    <h1>Order Confirmed</h1>
+    <h3>Payment will be on delivery</h3>
+    <p>Your order has been received and is being processed. You will receive a confirmation shortly, click on <a href="{% url 'user-dashboard' %}">My Dashboard</a> to see your order status.</p>
+  </div>
+{% endblock %}

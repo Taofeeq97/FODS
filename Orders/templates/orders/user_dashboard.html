@@ -1,0 +1,60 @@
+{% extends 'main.html' %}
+
+{% block content %}
+  <h2>Customer Order Queue Dashboard</h2>
+  {% if active_delivery_entity %}
+    <table>
+      <thead>
+        <tr>
+          <th>Food Items</th>
+          <th>Address</th>
+          <th>Is Accepted</th>
+          <th>Delivery Person</th>
+          <th>Delivery Status</th>
+          {% if active_delivery_entity.is_accepted %}
+          <th>Accept Delivery</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          {% for food in active_delivery_entity.food_cart.ordered_food.all  %}
+          <td>{{ food }}</td>
+          {% endfor %}
+          <td>{{ active_delivery_entity.address }}</td>
+          <td>{% if active_delivery_entity.is_accepted %}Accepted{% else %}Not Yet Accepted{% endif %}</td>
+          <td>{% if active_delivery_entity.delivery_person %}{{ active_delivery_entity.delivery_person }}{% else %}Not Yet Assigned{% endif %}</td>
+          <td>{% if active_delivery_entity.ongoing_status %}: Ongoing {% else %} No{% endif %}</td>
+          <td>
+            {% if active_delivery_entity.is_accepted %}
+            <form method="post" action="">
+    {% csrf_token %}
+    <input type="hidden" name="delivery_entity_id" value="{{ active_delivery_entity.id }}">
+    <button type="submit" class="btn btn-success">Accept Delivery</button>
+  </form>
+            {% endif %}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  {% else %}
+  <p>No active delivery.</p>
+
+  {% endif %}
+{% endblock %}
+
+<style>
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 10px;
+  }
+
+  tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+</style>

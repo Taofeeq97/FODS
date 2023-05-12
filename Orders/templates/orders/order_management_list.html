@@ -1,0 +1,58 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Delivery Entities</h2>
+  <form method="POST" action="">
+    {% csrf_token %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Owner</th>
+        <th>Deliveries</th>
+        <th>Delivery Person</th>
+        <th>Address</th>
+        <th>Is Accepted</th>
+        <th>Update</th>
+        <th>Delete</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for delivery_entity in delivery_entity_list %}
+      <tr>
+        <td>{{ delivery_entity.id }}</td>
+          <td>{{delivery_entity.owner.user.first_name}}</td>
+       <td>
+         {% for food in delivery_entity.food_cart.ordered_food.all %}
+
+        {{food}} ({{food.food_quantity}})
+          {% for food in food.get_ordered_optional_items %}
+
+           {% if food.quantity > 0 %}
+        {{food.optional_item}}( {{food.quantity}} )
+           {% endif %}
+          {% endfor %}
+        {% endfor %}
+       </td>
+
+        <td>{% if delivery_entity.delivery_person %}{{ delivery_entity.delivery_person.user.username }}{{ delivery_entity.delivery_person.user.last_name }}{% else %}Not yet assigned{% endif %}</td>
+        <td>{{ delivery_entity.address }}</td>
+        <td>
+          <td>
+              <input type="checkbox" name="delivery_entity_id" value="{{ delivery_entity.id }}"
+                {% if delivery_entity.is_accepted %}checked{% endif %} onchange="this.form.submit()">
+            </td>
+        </td>
+        <td><a href="{% url 'delivery-update' delivery_entity.id %}">Update</a></td>
+        <td><a href="{% url 'delivery-delete' delivery_entity.id %}">Delete</a></td>
+      </tr>
+      {% endfor %}
+
+    </tbody>
+  </table>
+  </form>
+  <a href="{% url 'create_delivery_entity' %}">Create delivery Entity for a customer</a>
+
+</div>
+{% endblock %}

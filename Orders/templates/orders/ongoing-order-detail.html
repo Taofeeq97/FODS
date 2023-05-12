@@ -1,0 +1,22 @@
+{% extends 'main.html' %}
+
+{% block content %}
+    <h1>Ongoing Order Details</h1>
+    <p><strong>Delivery Entity:</strong> {{ ongoing_order.delivery_entity }}</p>
+    <p><strong>Food Cart:</strong> {{ ongoing_order.delivery_entity.food_cart.id }}</p>
+    <p><strong>Delivery Person:</strong> {{ ongoing_order.delivery_person }}</p>
+    <p><strong>Is Cancelled:</strong> {{ ongoing_order.is_cancelled }}</p>
+    {% if ongoing_order.is_cancelled %}
+        <p><strong>Cancel Reason:</strong> {{ ongoing_order.get_cancel_reason_display }}</p>
+    {% else %}
+        <form method="post" action="{% url 'cancel_order' ongoing_order.id %}">
+            {% csrf_token %}
+            <select name="cancel_reason">
+                {% for choice in ongoing_order.CANCEL_REASON_CHOICES %}
+                    <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Cancel Order</button>
+        </form>
+    {% endif %}
+{% endblock %}

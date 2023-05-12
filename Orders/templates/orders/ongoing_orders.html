@@ -1,0 +1,49 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+{% if ongoing_orders %}
+    <h1>Ongoing Orders</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Delivery Entity</th>
+                <th>Food Cart</th>
+                <th>Delivery Person</th>
+                <th>Is Cancelled</th>
+                <th>Cancel Reason</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ongoing_order in ongoing_orders %}
+                <tr>
+                    <td>{{ ongoing_order.delivery_entity }}</td>
+                    <td>{{ ongoing_order.delivery_entity.food_cart.id }}</td>
+                    <td>{{ ongoing_order.delivery_entity.delivery_person.user.username }}</td>
+                    <td>{{ ongoing_order.is_cancelled }}</td>
+                    <td>
+                        {% if ongoing_order.is_cancelled %}
+                            {{ ongoing_order.get_cancel_reason_display }}
+                        {% else %}
+                            <form method="post" action="{% url 'cancel_order' ongoing_order.id %}">
+                                {% csrf_token %}
+                                <select name="cancel_reason">
+                                    {% for choice in ongoing_order.CANCEL_REASON_CHOICES %}
+                                        <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit">Cancel</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                    <td><a href="{% url 'ongoing_order_detail' ongoing_order.id %}">View Details</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% else %}
+<p>No active ongoing order</p>
+{% endif %}
+{% endblock %}

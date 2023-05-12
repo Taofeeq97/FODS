@@ -1,0 +1,36 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block content %}
+
+<body>
+    <main class="formPage my-xl" style="background-image: url('{% static 'images/bg.jpg' %}'); ">
+
+        <div class="content-box">
+            <div class="formWrapper">
+                <a class="backButton" href="#"><i class="im im-angle-left"></i></a>
+                <br>
+                    <h4> Update Profile </h4>
+                <form class="form" method="POST">
+                  {% csrf_token %}
+
+                  {% for field in form %}
+                    <!-- Input:Text -->
+                    <div class="form__field">
+                        <label for="formInput#text">{{field.label}} </label>
+                        {{field}}
+                    </div>
+                    {% for error in field.errors %}
+                    <p>{{error}}</p>
+                    {% endfor %}
+
+                  {% endfor %}
+
+                    <input class="btn btn--sub btn--lg  my-md" type="submit" value="Submit" />
+                </form>
+            </div>
+        </div>
+    </main>
+</body>
+
+{% endblock %}

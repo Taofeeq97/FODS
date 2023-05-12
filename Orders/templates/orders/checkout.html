@@ -1,0 +1,16 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="container">
+  <h2 class="text-center mb-4">Checkout</h2>
+
+  {% if delivery_option == 'delivery' %}
+    {% include 'delivery_details.html' %}
+  {% elif delivery_option == 'pickup' %}
+    {% include 'pickup_details.html' %}
+  {% endif %}
+</section>
+
+{% endblock %}

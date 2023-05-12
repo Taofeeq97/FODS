@@ -1,0 +1,68 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+ <main class="profile my-md">
+    <div class="container">
+      <div class="layout">
+        <div class="column column--2of3">
+          <div class="devInfo">
+            <h3 class="devInfo__title">About Me</h3>
+            <p class="devInfo__about">
+              Firstname: {{ user.first_name }}
+            </p>
+            <p class="devInfo__about">
+              Lastname: {{ user.last_name }}
+            </p>
+            <p class="devInfo__about">
+              Username: {{ user.username }}
+            </p>
+            <p class="devInfo__about">
+              Email: {{ user.email }}
+            </p>
+            <p class="devInfo__about">
+              phone Number: {{ user.phone_number }}
+            </p>
+            <p class="devInfo__about">
+              Address: {{ customer.user.address }}
+            </p>
+            <p class="devInfo__about">
+              No of Orders: {{ orders.count }}
+            </p>
+            <a href="{% url 'update_profile' %}" class="btn btn--sub btn--lg">Edit Profile </a>
+          </div>
+          {% if orders %}
+          <div class="devInfo">
+            <h3 class="devInfo__title">Completed Orders</h3>
+            <div class="grid grid--two">
+        {% for entity in orders %}
+              <div class="column">
+                <div class="card project">
+                  <a href="single-project.html" class="project">
+                    <div class="card__body">
+                      <h5>Items: </h5>
+                      {% for food in entity.food_cart.ordered_food.all %}
+                      <h3 class="project__title">{{food}}</h3>
+                      {% endfor %}
+                      <h5>Delivered by:</h5>
+                      <p><a class="project__author" href="profile.html">{{entity.delivery_person}}</a></p>
+
+                    </div>
+                  </a>
+                </div>
+              </div>
+
+{% endfor %}
+
+ {% else %}
+             <h3 class="devInfo__title">No completed order yet</h3>
+              {% endif %}
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+{% endblock %}

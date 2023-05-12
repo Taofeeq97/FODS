@@ -1,0 +1,36 @@
+
+<body>
+{% extends 'main.html' %}
+{% load static %}
+
+{% block content %}
+
+
+<!-- Main Section -->
+<main class="formPage my-xl" style="background-image: url('{% static 'images/bg.jpg' %}');" >
+    <div class="content-box">
+        <div class="formWrapper">
+            <h4>Create a new food Item</h4>
+            <a class="backButton" href="{% url 'foods' %}"><i class="im im-angle-left"></i></a>
+            <br>
+
+            <form class="form" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="form__field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                </div>
+                {% endfor %}
+
+                <input class="btn btn--sub btn--lg  my-md" type="submit" value="Submit" />
+            </form>
+        </div>
+    </div>
+</main>
+
+{% endblock content %}
+
+
+</body>
+</html>

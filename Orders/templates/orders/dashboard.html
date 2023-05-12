@@ -1,0 +1,54 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+{% if not delivery_entity %}
+<h4>You have no order</h4>
+{% else %}
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-8">
+      <h2>Delivery Details</h2>
+      <p><strong>Delivery Entity ID:</strong> {{ delivery_entity.id }}</p>
+        <p><strong>Deliveries</strong> {{ delivery_entity }}</p>
+      <p><strong>Owner:</strong> {{ delivery_entity.owner.user.first_name }} {{ delivery_entity.owner.user.last_name }}</p>
+      <p><strong>Delivery Person:</strong> {% if delivery_entity.delivery_person %}{{ delivery_entity.delivery_person.user.first_name }} {{ delivery_entity.delivery_person.user.last_name }}{% else %}Not yet assigned{% endif %}</p>
+      <p><strong>Address:</strong> {{ delivery_entity.address }}</p>
+      <p><strong>Order Status:</strong> {% if delivery_entity.is_accepted %}Accepted{% else %}Not yet accepted{% endif %}</p>
+      <hr>
+      <h4>Order Items</h4>
+
+      <ul>
+        {% for item in delivery_entity.order.all %}
+        <li>{{ item.quantity }} x {{ item.order.name }} - ${{ item.order.price }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Delivery Status</h5>
+          {% if delivery_entity.is_accepted %}
+          <p class="card-text"><strong>Status:</strong> Accepted</p>
+          {% else %}
+          <p class="card-text"><strong>Status:</strong> Pending</p>
+          {% endif %}
+          {% if delivery_entity.is_delivered %}
+          <p class="card-text"><strong>Status:</strong> Delivered</p>
+          {% else %}
+          <p class="card-text"><strong>Status:</strong> Not yet delivered</p>
+          {% endif %}
+          {% if not delivery_entity.is_fulfilled %}
+          <form method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success" name="accept_delivery">Accept Delivery</button>
+            <button type="submit" class="btn btn-primary" name="mark_delivered">Mark as Delivered</button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif%}
+{% endblock %}

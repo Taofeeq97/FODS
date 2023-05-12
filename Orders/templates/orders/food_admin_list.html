@@ -1,0 +1,38 @@
+{% extends 'main.html' %}
+
+{% block content %}
+  <h1>Food List</h1>
+  <form method="POST">
+    {% csrf_token %}
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Tags</th>
+          <th>Price</th>
+          <th>Optional Items</th>
+          <th>Active?</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for food in object_list %}
+          <tr>
+            <td>{{ food.name }}</td>
+            <td>{{ food.description }}</td>
+            <td>{{ food.tags.all|join:", " }}</td>
+            <td>{{ food.price }}</td>
+            <td>{{ food.optional_items.all|join:", " }}</td>
+            <td>
+              <input type="checkbox" name="food_id" value="{{ food.id }}"
+                {% if food.is_active %}checked{% endif %} onchange="this.form.submit()">
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </form>
+<a href="{% url 'create-food' %}">Create New Food Item</a><br>
+<a href="{% url 'create-tag' %}">Create New Food Tag</a><br>
+<a href="{% url 'create-optionalitem' %}">Create New Food Optional Item</a>
+{% endblock %}

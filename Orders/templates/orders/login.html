@@ -1,0 +1,32 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block content %}
+<body>
+    <main class="formPage my-xl" style="background-image: url('{% static 'images/bg.jpg' %}'); ">
+
+        <div class="content-box">
+            <div class="formWrapper">
+                <a class="backButton" href="#"><i class="im im-angle-left"></i></a>
+                <br>
+                    <h4> Login </h4>
+                <form class="form" method="POST">
+                  {% csrf_token %}
+
+                  {% for field in form %}
+                    <!-- Input:Text -->
+                    <div class="form__field">
+                        <label for="formInput#text">{{field.label}} </label>
+                        {{field}}
+                    </div>
+                  {% endfor %}
+                    <input class="btn btn--sub btn--lg  my-md" type="submit" value="Submit" />
+                </form>
+                <h5>Forgot Password <a href="{% url 'reset_password' %}">Click here</a></h5>
+                <h4>Want to create an account with us? <a href="{% url 'create_customer_account' %}">Create Account</a></h4>
+            </div>
+        </div>
+    </main>
+</body>
+
+{% endblock %}

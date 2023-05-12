@@ -1,0 +1,54 @@
+{% extends 'main.html' %}
+
+{% block content %}
+  <h1>Pickup</h1>
+  <h2>Order Summary</h2>
+  <p>Cart ID: {{ food_cart.id }}</p>
+  <p>Date Added: {{ food_cart.date_checked_out }}</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Food</th>
+        <th></th>
+        <th>Optional Items</th>
+
+      </tr>
+    </thead>
+    <tbody>
+      {% for cart_item in cart_items %}
+        <tr>
+          <td>{{ cart_item.food.name }}</td>
+          <td>{{ cart_item.food.price}} ({{cart_item.food_quantity}})</td>
+          <td></td>
+          <td>
+            {% for optional_item in cart_item.get_ordered_optional_items %}
+            {% if optional_item.quantity > 0 %}
+            {{optional_item.optional_item.name}}
+            ({{optional_item.optional_item.price}})
+            X {{ optional_item.quantity }}<br>
+            {% endif %}
+            {% endfor %}
+<!--            {% for optional_item in cart_item.optional_item.all %}-->
+<!--              {{ optional_item.name }} ({{ optional_item.price }})<br>-->
+<!--            {% endfor %}-->
+          </td>
+          <td>{{ cart_item.get_total }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <th colspan="2">Total Price:</th>
+        <td>&#8358;{{ total }}</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <form method="post">
+    {% csrf_token %}
+    <label for="phone_number">Phone Number:</label><br>
+    <input type="text" name="phone_number" id="phone_number" placeholder="Enter your phone number" required><br>
+    <input type="submit" value="Place Pickup Order">
+  </form>
+{% endblock %}

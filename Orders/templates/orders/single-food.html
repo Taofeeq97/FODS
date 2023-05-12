@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{% extends 'main.html' %}
+{% load static %}
+
+{% block content %}
+
+
+
+
+
+
+<form method="post">
+  {% csrf_token %}
+
+ <main class="singleProject my-md" >
+    <div class="container">
+      <div class="layout">
+        <div class="column column--1of3">
+          <h3 class="singleProject__subtitle">Food Tags</h3>
+          <div class="singleProject__toolStack">
+              {% for tag in single_food.tags.all %}
+            <span class="tag tag--pill tag--sub tag--lg">
+              <small>{{tag}}</small>
+            </span>
+              {% endfor %}
+          </div>
+
+          <h3 class="singleProject__subtitle">Optional items</h3>
+
+          <!-- Display select box for optional items -->
+{% for optional_item in single_food.optional_items.all %}
+<div>
+  <div style="margin-top: 20px;">
+    <label for="optional_item_{{ optional_item.pk }}">{{ optional_item.name }} - <b>&#8358;{{ optional_item.price }}</b></label>
+    <input class="input input--text" type="number" name="optional_item_{{ optional_item.pk }}" min="0" value="0" />
+  </div>
+</div>
+{% endfor %}
+          <div style="margin-top: 20px;">
+            <input type="submit" class="btn btn--sub btn--lg" value="Add to my food cart">
+          </div>
+        </div>
+
+        <div class="column column--2of3">
+          <img class="singleProject__preview" src="{{ single_food.picture.url }}" alt="portfolio thumbnail" />
+          <a href="" class="singleProject__developer">&#8358;<span id="base_price">{{ single_food.price }}</span></a>
+          <h2 class="singleProject__title">{{ single_food.name }}</h2>
+          <div style="margin-top: 20px;">
+            <label for="quantity">Quantity:</label>
+            <input class="input input--text" type="number" name="quantity" min="1" value="1">
+          </div>
+          <h3 class="singleProject__subtitle">About the Food</h3>
+          <div class="singleProject__info">{{ single_food.description }}</div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </main>
+</form>
+
+{% endblock content %}
+
+</body>
+</html>
