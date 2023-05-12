@@ -81,7 +81,7 @@ ELASTICSEARCH_DSL = {
     },
 
 }
-CSRF_TRUSTED_ORIGINS = ['https://web-production-0d7a.up.railway.app/']
+CSRF_TRUSTED_ORIGINS = ['*']
 
 
 
