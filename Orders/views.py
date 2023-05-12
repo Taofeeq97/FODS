@@ -7,6 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 from django.core.mail import send_mail
+from django.db.models import Q
 from accounts.models import DeliveryPerson
 from .forms import (
     DeliveryEntityForm, TagForm, OptionalItemForm, FoodCreateForm
@@ -26,6 +27,23 @@ class AdminRequiredMixin(UserPassesTestMixin):
         return self.request.user.is_superuser
 
 
+# class FoodListView(generic.ListView):
+#     model = Food
+#     template_name = 'orders/foods.html'
+#     context_object_name = 'foods'
+#     queryset = Food.active_objects.all()
+#
+#     def get_queryset(self):
+#         queryset = super().get_queryset()
+#         search_query = self.request.GET.get('search_query')
+#         if search_query:
+#             search = FoodDocument.search().query("match", name=search_query)
+#             results = search.execute()
+#             food_ids = [hit.meta.id for hit in results]
+#             queryset = queryset.filter(id__in=food_ids)
+#         return queryset
+
+
 class FoodListView(generic.ListView):
     model = Food
     template_name = 'orders/foods.html'
@@ -36,10 +54,9 @@ class FoodListView(generic.ListView):
         queryset = super().get_queryset()
         search_query = self.request.GET.get('search_query')
         if search_query:
-            search = FoodDocument.search().query("match", name=search_query)
-            results = search.execute()
-            food_ids = [hit.meta.id for hit in results]
-            queryset = queryset.filter(id__in=food_ids)
+            queryset = queryset.filter(
+                Q(name__icontains=search_query)
+            )
         return queryset
 
 
@@ -275,6 +292,7 @@ class PickupView(View):
             'total': sum([cart_item.get_total_price() for cart_item in food_cart.ordered_food.all()])
         }
         return render(request, 'orders/pickup.html', context)
+
     def post(self, request, *args, **kwargs):
         phone_number = request.POST.get('phone_number')
         pickup_entity = DeliveryEntity.objects.create(
