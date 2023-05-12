@@ -112,6 +112,13 @@ class DeliveryPersonForm(forms.ModelForm):
         model = CustomUser
         fields = ['username', 'password', 'email', 'address', 'phone_number', 'ride_number']
 
+
+    def __init__(self, *args, **kwargs):
+        super(DeliveryPersonForm, self).__init__(*args, **kwargs)
+
+        for name, field in self.fields.items():
+            field.widget.attrs.update({'class': 'input'})
+
     def clean_username(self):
         username = self.cleaned_data.get('username')
         User = get_user_model()
