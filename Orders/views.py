@@ -454,6 +454,7 @@ class DeliveryEntityUpdateView(AdminRequiredMixin, SuccessMessageMixin, generic.
 class DeliveryEntityDeleteView(AdminRequiredMixin, generic.DeleteView):
     model = DeliveryEntity
     success_url = reverse_lazy('admin_order_management')
+    template_name = 'orders/deliveryentity_confirm_delete.html'
 
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
