@@ -112,7 +112,6 @@ class DeliveryPersonForm(forms.ModelForm):
         model = CustomUser
         fields = ['username', 'password', 'email', 'address', 'phone_number', 'ride_number']
 
-
     def __init__(self, *args, **kwargs):
         super(DeliveryPersonForm, self).__init__(*args, **kwargs)
 
