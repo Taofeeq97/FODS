@@ -1,10 +1,18 @@
 <html>
 <head>
+    <!-- Add the Leaflet CSS and Geocoder CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+
     <style>
         #mapid {
             height: 100vh;
             width: 100vw;
+        }
+
+        .leaflet-top.leaflet-right {
+            top: 10px;
+            right: 10px;
         }
     </style>
 </head>
@@ -17,67 +25,69 @@
     </form>
 
 
-<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
-<script>
-    window.onload = init;
-    function init() {
-        const mymap = L.map('mapid', {
-            center: [7.3775, 3.9470], // Set the center coordinates to Ibadan, Nigeria
-            zoom: 12, // Set the initial zoom level
-            layers: [
-                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                })
-            ]
-        });
+    <!-- Add the Leaflet JS and Geocoder JS -->
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
-        // Example data for Ibadan areas (replace with your own data)
-        var ibadanAreas = [
-            {
-                name: 'Area 1',
-                coordinates: [
-                    [7.1234, 3.5678],
-                    [7.2345, 3.6789],
-                    [7.3456, 3.7890],
-                    // Add more coordinates for the area
+    <script>
+        window.onload = init;
+        function init() {
+            const mymap = L.map('mapid', {
+                center: [7.3775, 3.9470], // Set the center coordinates to Ibadan, Nigeria
+                zoom: 12, // Set the initial zoom level
+                layers: [
+                    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    })
                 ]
-            },
-            {
-                name: 'Area 2',
-                coordinates: [
-                    [7.9876, 3.4321],
-                    [7.8765, 3.3210],
-                    [7.7654, 3.2109],
-                    // Add more coordinates for the area
-                ]
-            },
-            // Add more areas and their coordinates
-        ];
+            });
 
-        // Loop through the areas data and create polygons on the map
-        ibadanAreas.forEach(function(area) {
-            L.polygon(area.coordinates, { fillColor: 'green', color: 'black' }).addTo(mymap).bindPopup(area.name);
-        });
+            // Example data for Ibadan areas (replace with your own data)
+            var ibadanAreas = [
+                {
+                    name: 'Area 1',
+                    coordinates: [
+                        [7.1234, 3.5678],
+                        [7.2345, 3.6789],
+                        [7.3456, 3.7890],
+                        // Add more coordinates for the area
+                    ]
+                },
+                {
+                    name: 'Area 2',
+                    coordinates: [
+                        [7.9876, 3.4321],
+                        [7.8765, 3.3210],
+                        [7.7654, 3.2109],
+                        // Add more coordinates for the area
+                    ]
+                },
+                // Add more areas and their coordinates
+            ];
 
-        var marker;
+            // Loop through the areas data and create polygons on the map
+            ibadanAreas.forEach(function(area) {
+                L.polygon(area.coordinates, { fillColor: 'green', color: 'black' }).addTo(mymap).bindPopup(area.name);
+            });
 
-        mymap.on('click', function(e) {
-            if (marker) {
-                mymap.removeLayer(marker);
-            }
-            marker = L.marker(e.latlng).addTo(mymap);
-            var locationInput = document.getElementById('locationInput');
-            locationInput.value = e.latlng.lat + ', ' + e.latlng.lng;
+            var marker;
 
-            // Submit the form
-            var form = document.getElementById('locationForm');
-            form.submit();
-        });
-    }
-</script>
+            mymap.on('click', function(e) {
+                if (marker) {
+                    mymap.removeLayer(marker);
+                }
+                marker = L.marker(e.latlng).addTo(mymap);
+                var locationInput = document.getElementById('locationInput');
+                locationInput.value = e.latlng.lat + ', ' + e.latlng.lng;
 
+                // Submit the form
+                var form = document.getElementById('locationForm');
+                form.submit();
+            });
 
-
-
+            // Add the Geocoder control to the map
+            L.Control.geocoder().addTo(mymap);
+        }
+    </script>
 </body>
 </html>
