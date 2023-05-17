@@ -1,5 +1,7 @@
 from .models import FoodCart
 from .session import unauthenticated_user_session_id
+
+
 def food_cart_items_count(request):
     cart_total = 0
 
@@ -10,7 +12,8 @@ def food_cart_items_count(request):
 
     else:
         session_id = request.session.session_key
-        selected_cart = FoodCart.objects.filter(session_id=unauthenticated_user_session_id(request), is_checked_out=False).first()
+        selected_cart = FoodCart.objects.filter(session_id=unauthenticated_user_session_id(request),
+                                                is_checked_out=False).first()
         if selected_cart is not None:
             cart_total = selected_cart.ordered_food.count()
 

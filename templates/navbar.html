@@ -21,7 +21,7 @@
             </label>
             <ul class="header__menu">
                 <li class="header__menuItem"><a href="{% url 'foods' %}">Foods</a></li>
-                {% if request.user.is_authenticated and not request.user.is_staff and request.user.customer %}
+                {% if request.user.is_authenticated and not request.user.is_staff %}
                     <li class="header__menuItem"><a href="{% url 'cart' %}">Cart  ({{ cart_total }})</a></li>
                     <li class="header__menuItem"><a href="{% url 'user-dashboard' %}" class="btn btn--sub">Dashboard</a></li>
                     <li class="header__menuItem"><a href="{% url 'profile' %}" class="btn btn--sub">Profile</a></li>

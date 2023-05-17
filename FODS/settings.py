@@ -48,8 +48,8 @@ INSTALLED_APPS = [
     'rest_framework',
 
     'rest_framework_simplejwt',
-    'django_elasticsearch_dsl',
-    'django_elasticsearch_dsl_drf',
+    # 'django_elasticsearch_dsl',
+    # 'django_elasticsearch_dsl_drf',
 
 ]
 
@@ -152,18 +152,18 @@ WSGI_APPLICATION = 'FODS.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-#
 # DATABASES = {
-#     'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=1800)
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
 # }
 #
-#
+DATABASES = {
+    'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=1800)
+}
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

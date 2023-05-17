@@ -22,6 +22,8 @@ urlpatterns = [
     path('ongoing-order/<int:pk>/cancel/', views.CancelOrderView.as_view(), name='cancel_order'),
     path('create-tag/', views.CreateFoodTagView.as_view(), name='create-tag'),
     path('create_optional_item/', views.CreateFoodOptionalItemView.as_view(), name='create-optionalitem'),
+    # path('map/', views.save_location, name='save_location'),
+    path('delivery/<int:cart_id>/save-location/', views.save_location, name='save_location'),
 ]
 
 

@@ -2,6 +2,8 @@ from django import forms
 from .models import Food, DeliveryEntity, FoodCart, OrderedFood, Tag, OptionalItem
 
 
+
+
 class DeliveryEntityForm(forms.ModelForm):
     foods = forms.ModelMultipleChoiceField(queryset=Food.objects.all(), required=False,
                                            widget=forms.CheckboxSelectMultiple)
@@ -109,3 +111,11 @@ class TagForm(forms.ModelForm):
 
         for name, field in self.fields.items():
             field.widget.attrs.update({'class': 'input'})
+
+
+class LocationForm(forms.Form):
+    lat = forms.FloatField(widget=forms.HiddenInput())
+    lon = forms.FloatField(widget=forms.HiddenInput())
+
+
+

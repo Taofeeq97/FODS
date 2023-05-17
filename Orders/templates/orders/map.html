@@ -1,0 +1,46 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+    <style>
+        #mapid {
+            height: 100vh;
+            width: 100vw;
+        }
+    </style>
+</head>
+<body>
+    <div id="mapid"></div>
+    <form id="locationForm" method="POST" action="{% url 'save_location' cart_id %}">
+        {% csrf_token %}
+        <input type="hidden" id="locationInput" name="location" value="">
+        <button type="submit">Submit</button>
+    </form>
+
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+    <script>
+        window.onload = init;
+        function init() {
+            const mymap = L.map('mapid', {
+                center: [7.3775, 3.9470], // Set the center coordinates to Ibadan, Nigeria
+                zoom: 12, // Set the initial zoom level
+                layers: [
+                    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    })
+                ]
+            });
+
+            var marker;
+
+            mymap.on('click', function(e) {
+                if (marker) {
+                    mymap.removeLayer(marker);
+                }
+                marker = L.marker(e.latlng).addTo(mymap);
+                var locationInput = document.getElementById('locationInput');
+                locationInput.value = e.latlng.lat + ', ' + e.latlng.lng;
+            });
+        }
+    </script>
+</body>
+</html>

@@ -166,3 +166,10 @@ class OngoingOrder(models.Model):
 
     def __str__(self):
         return f"OngoingOrder for {self.delivery_entity}"
+
+
+# class SelectedLocation(models.Model):
+#     location = models.Po
+#
+#     def __str__(self):
+#         return self.location

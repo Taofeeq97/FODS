@@ -1,11 +1,13 @@
 {% extends 'main.html' %}
 
+
+
 {% block content %}
   <h1>Order Summary</h1>
   <p><strong>Cart ID:</strong> {{ food_cart.id }}</p>
   <p><strong>Date Added:</strong> {{ food_cart.date_checked_out }}</p>
 
-<h3>Kindly note that we only offer delivery services to areas within Ibadan</h3>
+  <h3>Kindly note that we only offer delivery services to areas within Ibadan</h3>
   <h4>Food(s) ordered</h4>
 
   <table>
@@ -47,26 +49,27 @@
     </tfoot>
   </table>
 
-  <h2>Delivery Details</h2>
-  <form method="post">
-    {% csrf_token %}
-    {% if delivery_canceled %}
-      <input type="hidden" name="delivery_canceled" value="1">
+
+<h2>Delivery Details</h2>
+<form method="post">
+  {% csrf_token %}
+  {% if delivery_canceled %}
+    <input type="hidden" name="delivery_canceled" value="1">
+  {% endif %}
+  <div class="form-group">
+    <label for="address">Address:</label>
+    <a href="{% url 'save_location' food_cart.id %}">Choose location</a>
+    {% if request.GET.address %}
+      <span>{{ request.GET.address }}</span>
     {% endif %}
+  </div>
+  {% if not request.user.is_authenticated %}
     <div class="form-group">
-      <label for="address">Address:</label>
-      <input type="text" name="address" id="address" class="form-control" placeholder="House number, street name" {% if not request.user.is_authenticated %}required{% endif %}>
+      <label for="phone_number">Phone Number:</label>
+      <input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="Phone number" required>
     </div>
-    <div class="form-group">
-      <label for="city">City:</label>
-      <input type="text" name="city" id="city" class="form-control" value="Ibadan" {% if not delivery_canceled %}required{% endif %}>
-    </div>
-    {% if not request.user.is_authenticated %}
-      <div class="form-group">
-        <label for="phone_number">Phone Number:</label>
-        <input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="Phone number" required>
-      </div>
-    {% endif %}
-    <button type="submit" class="btn btn-primary">Place Order</button>
-  </form>
+  {% endif %}
+  <button type="submit" class="btn btn-primary">Place Order</button>
+</form>
+
 {% endblock %}

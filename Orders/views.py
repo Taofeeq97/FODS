@@ -1,5 +1,5 @@
 from random import choice
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse, reverse_lazy
 from django.views import View, generic
@@ -8,6 +8,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.db.models import Q
+from django.http import JsonResponse
 from accounts.models import DeliveryPerson
 from .forms import (
     DeliveryEntityForm, TagForm, OptionalItemForm, FoodCreateForm
@@ -18,6 +19,10 @@ from .models import (
 )
 from .documents import FoodDocument
 from .session import unauthenticated_user_session_id
+import folium
+from folium.plugins import Draw
+from django.shortcuts import render
+from .get_address import get_address
 
 
 # Create your views here.
@@ -26,23 +31,6 @@ from .session import unauthenticated_user_session_id
 class AdminRequiredMixin(UserPassesTestMixin):
     def test_func(self):
         return self.request.user.is_superuser
-
-
-class FoodListView(generic.ListView):
-    model = Food
-    template_name = 'orders/foods.html'
-    context_object_name = 'foods'
-    queryset = Food.active_objects.all()
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        search_query = self.request.GET.get('search_query')
-        if search_query:
-            search = FoodDocument.search().query("match", name=search_query)
-            results = search.execute()
-            food_ids = [hit.meta.id for hit in results]
-            queryset = queryset.filter(id__in=food_ids)
-        return queryset
 
 
 # class FoodListView(generic.ListView):
@@ -55,10 +43,27 @@ class FoodListView(generic.ListView):
 #         queryset = super().get_queryset()
 #         search_query = self.request.GET.get('search_query')
 #         if search_query:
-#             queryset = queryset.filter(
-#                 Q(name__icontains=search_query)
-#             )
+#             search = FoodDocument.search().query("match", name=search_query)
+#             results = search.execute()
+#             food_ids = [hit.meta.id for hit in results]
+#             queryset = queryset.filter(id__in=food_ids)
 #         return queryset
+
+
+class FoodListView(generic.ListView):
+    model = Food
+    template_name = 'orders/foods.html'
+    context_object_name = 'foods'
+    queryset = Food.active_objects.all()
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search_query')
+        if search_query:
+            queryset = queryset.filter(
+                Q(name__icontains=search_query)
+            )
+        return queryset
 
 
 def detail_view(request, pk):
@@ -176,8 +181,8 @@ class CartView(generic.TemplateView):
             user = self.request.user.customer
             cart = FoodCart.objects.filter(user=user, is_checked_out=False).first()
         else:
-            ip_address = self.request.META.get('REMOTE_ADDR')
-            cart = FoodCart.objects.filter(session_id=unauthenticated_user_session_id(self.request), is_checked_out=False).first()
+            cart = FoodCart.objects.filter(session_id=unauthenticated_user_session_id(self.request),
+                                           is_checked_out=False).first()
 
         if cart is not None:
             cart_items = cart.ordered_food.prefetch_related('optional_items').all()
@@ -189,7 +194,8 @@ class CartView(generic.TemplateView):
                 )
 
                 # Filter out any optional items that are not ordered
-                item.ordered_optional_items = [ordered_optional_item for ordered_optional_item in item.orderedoptionalitem_set.all() if ordered_optional_item.quantity > 0]
+                item.ordered_optional_items = [ordered_optional_item for ordered_optional_item in
+                                               item.orderedoptionalitem_set.all() if ordered_optional_item.quantity > 0]
 
             context['cart_items'] = cart_items
             context['cart'] = cart
@@ -244,10 +250,11 @@ class DeliveryView(View):
         return render(request, 'orders/delivery.html', context)
 
     def post(self, request, *args, **kwargs):
-        address = request.POST.get('address')
-        city = request.POST.get('city').lower()
         phone_number = request.POST.get('phone_number')
-        if city != 'ibadan':
+        address = request.GET.get('address')
+        state=address.split(',')[-2].lower()
+        print(state)
+        if state != ' oyo state':
             messages.error(request, 'Sorry, we do not deliver outside of Ibadan.')
             return redirect('cart')
         if request.user.is_authenticated:
@@ -327,8 +334,9 @@ class UserDashboardView(View):
         if request.user.is_authenticated:
             active_delivery_entity = DeliveryEntity.objects.filter(owner=request.user.customer, is_active=True).first()
         else:
-            active_delivery_entity = DeliveryEntity.objects.filter(session_id=unauthenticated_user_session_id(self.request),
-                                                                   is_active=True).first()
+            active_delivery_entity = DeliveryEntity.objects.filter(
+                session_id=unauthenticated_user_session_id(self.request),
+                is_active=True).first()
         context = {
             'active_delivery_entity': active_delivery_entity
         }
@@ -488,3 +496,18 @@ class CancelOrderView(AdminRequiredMixin, View):
         else:
             messages.error(request, 'Please select a cancel reason.')
         return redirect('ongoing_orders')
+
+
+from django.shortcuts import redirect, reverse
+
+def save_location(request, cart_id):
+    if request.method == 'POST':
+        location = request.POST.get('location')
+        latitude, longitude = location.split(', ')
+        address = get_address(latitude, longitude)
+        return redirect(reverse('delivery', args=[cart_id]) + f'?address={address}')
+
+    else:
+        context = {'cart_id': cart_id}
+        return render(request, 'orders/map.html', context)
+
