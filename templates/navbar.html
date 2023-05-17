@@ -32,6 +32,7 @@
                     <li class="header__menuItem"><a href="{% url 'ongoing_orders' %}" class="btn btn--sub">Ongoing Orders</a></li>
                     <li class="header__menuItem"><a href="{% url 'logout' %}" class="btn btn--sub">Logout</a></li>
                 {% else %}
+                    <li class="header__menuItem"><a href="{% url 'user-dashboard' %}" class="btn btn--sub">Dashboard</a></li>
                     <li class="header__menuItem"><a href="{% url 'cart' %}">Cart  ({{ cart_total }})</a></li>
                     <li class="header__menuItem"><a href="{% url 'login' %}" class="btn btn--sub">Login/Sign Up</a></li>
                 {% endif %}

@@ -8,6 +8,8 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.db.models import Q
+from django.contrib.sessions.backends.db import SessionStore
+from django.contrib.sessions.models import Session
 from accounts.models import DeliveryPerson
 from .forms import (
     DeliveryEntityForm, TagForm, OptionalItemForm, FoodCreateForm
@@ -60,13 +62,18 @@ class FoodListView(generic.ListView):
         return queryset
 
 
+def _session_id(request):
+    session_id = request.session.session_key
+    if not session_id:
+        session_id = request.session.create()
+    return session_id
+
 def detail_view(request, pk):
     if request.method == 'POST':
         food = Food.objects.get(id=pk)
         food_quantity = int(request.POST.get('quantity'))
         optional_items = []
         optional_item_quantities = []
-        ip_address = request.META.get('REMOTE_ADDR')
         for key, value in request.POST.items():
             if key.startswith('optional_item_'):
                 optional_item_id = key.split('_')[-1]
@@ -81,7 +88,7 @@ def detail_view(request, pk):
             )
         else:
             ordered_food = OrderedFood.objects.create(
-                ip_address=ip_address,
+                session_id=_session_id(request),
                 food=food,
                 food_quantity=food_quantity
             )
@@ -125,11 +132,11 @@ def detail_view(request, pk):
             return redirect('cart')
 
         else:
-            selected_cart = FoodCart.objects.filter(ip_address=ip_address,
-                                                    is_checked_out=False).first()
+
+            selected_cart = FoodCart.objects.filter(session_id=_session_id(request), is_checked_out=False).first()
+
             if selected_cart is not None:
                 existing_ordered_food = selected_cart.ordered_food.filter(food=ordered_food.food).first()
-                print('yes', existing_ordered_food)
                 if existing_ordered_food is not None:
                     existing_ordered_food.food_quantity += ordered_food.food_quantity
                     existing_ordered_optional_items = existing_ordered_food.get_ordered_optional_items()
@@ -150,10 +157,10 @@ def detail_view(request, pk):
                     return redirect('cart')
                 else:
                     selected_cart.ordered_food.add(ordered_food)
-                    messages.success(request, f'{ordered_food} successfully addedd')
+                    messages.success(request, f'{ordered_food} successfully added')
                     return redirect('cart')
             else:
-                new_cart = FoodCart.objects.create(ip_address=ip_address)
+                new_cart = FoodCart.objects.create(session_id=_session_id(request))
                 new_cart.ordered_food.add(ordered_food)
                 new_cart.save()
                 messages.success(request, f'{ordered_food} successfully added to your cart')
@@ -177,7 +184,7 @@ class CartView(generic.TemplateView):
             cart = FoodCart.objects.filter(user=user, is_checked_out=False).first()
         else:
             ip_address = self.request.META.get('REMOTE_ADDR')
-            cart = FoodCart.objects.filter(ip_address=ip_address, is_checked_out=False).first()
+            cart = FoodCart.objects.filter(session_id=_session_id(request=self.request), is_checked_out=False).first()
 
         if cart is not None:
             cart_items = cart.ordered_food.prefetch_related('optional_items').all()
@@ -229,7 +236,7 @@ class RemoveFoodCartItemView(View):
             cart = FoodCart.objects.filter(user=user, id=cart_id).first()
         else:
             ip_address = request.META.get('REMOTE_ADDR')
-            cart = FoodCart.objects.filter(ip_address=ip_address, id=cart_id).first()
+            cart = FoodCart.objects.filter(session_id=_session_id(request=self.request), id=cart_id).first()
 
         if cart is not None:
             food_item = get_object_or_404(OrderedFood, food__id=food_id, foodcart=cart)
@@ -271,7 +278,7 @@ class DeliveryView(View):
         else:
             delivery_entity = DeliveryEntity.objects.create(
                 food_cart=FoodCart.objects.get(id=kwargs['cart_id']),
-                ip_address=request.META.get('REMOTE_ADDR'),
+                session_id=_session_id(request=self.request),
                 address=address,
                 phone_number=phone_number
             )
@@ -333,7 +340,7 @@ class UserDashboardView(View):
         if request.user.is_authenticated:
             active_delivery_entity = DeliveryEntity.objects.filter(owner=request.user.customer, is_active=True).first()
         else:
-            active_delivery_entity = DeliveryEntity.objects.filter(ip_address=request.META.get('REMOTE_ADDR'),
+            active_delivery_entity = DeliveryEntity.objects.filter(session_id=_session_id(self.request),
                                                                    is_active=True).first()
         context = {
             'active_delivery_entity': active_delivery_entity

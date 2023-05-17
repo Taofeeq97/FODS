@@ -45,7 +45,7 @@ class OptionalItem(models.Model):
 
 class OrderedFood(models.Model):
     user = models.ForeignKey(Customer, on_delete=models.CASCADE, blank=True, null=True)
-    ip_address = models.CharField(max_length=500, blank=True)
+    session_id = models.CharField(max_length=500, blank=True, null=True)
     food = models.ForeignKey(Food, on_delete=models.CASCADE)
     optional_items = models.ManyToManyField(OptionalItem, through='OrderedOptionalItem')
     food_quantity = models.IntegerField(default=1, blank=True, null=True)
@@ -90,13 +90,14 @@ class OrderedOptionalItem(models.Model):
 
 class FoodCart(models.Model):
     user = models.ForeignKey(Customer, on_delete=models.CASCADE, blank=True, null=True)
-    ip_address = models.CharField(max_length=500, blank=True)
+    session_id = models.CharField(max_length=500, blank=True, null=True)
     ordered_food = models.ManyToManyField(OrderedFood, blank=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_checked_out = models.DateTimeField(null=True, blank=True)
     is_checked_out = models.BooleanField(default=False)
     created = models.DateField(auto_now_add=True, null=True, blank=True)
     updated = models.DateField(auto_now=True, null=True, blank=True)
+
 
     # def cart_number_of_items(self):
     #     return self.ordered_food.count()
@@ -111,7 +112,7 @@ class FoodCart(models.Model):
 
 class DeliveryEntity(models.Model):
     food_cart = models.ForeignKey(FoodCart, on_delete=models.CASCADE, blank=True, null=True)
-    ip_address = models.CharField(max_length=500, blank=True, null=True)
+    session_id = models.CharField(max_length=500, blank=True,null=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     owner = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True, blank=True)
     delivery_person = models.ForeignKey(DeliveryPerson, on_delete=models.SET_NULL, null=True, blank=True)
@@ -133,7 +134,7 @@ class DeliveryEntity(models.Model):
         if self.owner:
             return f"{self.owner.user.username}'s delivery entity for {[ordered_food.food.name for ordered_food in self.food_cart.ordered_food.all()]}"
         else:
-            return f"{self.ip_address}'s delivery entity for {[ordered_food.food.name for ordered_food in self.food_cart.ordered_food.all()]}"
+            return f"{self.session_id}'s delivery entity for {[ordered_food.food.name for ordered_food in self.food_cart.ordered_food.all()]}"
 
 
 class OngoingOrder(models.Model):

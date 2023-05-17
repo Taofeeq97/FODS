@@ -24,6 +24,7 @@ class DeliveryEntityForm(forms.ModelForm):
         address = self.cleaned_data.get('address')
         foods = self.cleaned_data.get('foods')
         optional_items = self.cleaned_data.get('optional_items')
+        print(optional_items)
 
         ordered_foods = []
         for food in foods:
@@ -31,14 +32,17 @@ class DeliveryEntityForm(forms.ModelForm):
                 user=owner,
                 food=food,
             )
+            ordered_food.optional_items.set(optional_items)
             ordered_foods.append(ordered_food)
+            # print(ordered_food.optional_items)
 
         food_cart = FoodCart.objects.create(
             user=owner,
+            is_checked_out=True,
         )
         food_cart.ordered_food.set(ordered_foods)
-
         delivery_entity.food_cart = food_cart
+
         delivery_entity.owner = owner
         delivery_entity.address = address
         delivery_entity.delivery_person = delivery_person
@@ -82,7 +86,6 @@ class OptionalItemForm(forms.ModelForm):
 
         for name, field in self.fields.items():
             field.widget.attrs.update({'class': 'input'})
-
 
     def clean_price(self):
         price = self.cleaned_data['price']
