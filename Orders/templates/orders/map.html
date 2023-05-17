@@ -21,7 +21,6 @@
     <form id="locationForm" method="POST" action="{% url 'save_location' cart_id %}">
         {% csrf_token %}
         <input type="hidden" id="locationInput" name="location" value="">
-
     </form>
 
 
@@ -31,16 +30,29 @@
 
     <script>
         window.onload = init;
+
         function init() {
             const mymap = L.map('mapid', {
-                center: [7.3775, 3.9470], // Set the center coordinates to Ibadan, Nigeria
-                zoom: 12, // Set the initial zoom level
                 layers: [
                     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     })
                 ]
             });
+
+            // Add the Geocoder control to the map
+            L.Control.geocoder().addTo(mymap);
+
+            // Get user's location
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const { latitude, longitude } = position.coords;
+                    mymap.setView([latitude, longitude], 12);
+                },
+                function(error) {
+                    console.error('Error getting user location:', error);
+                }
+            );
 
             // Example data for Ibadan areas (replace with your own data)
             var ibadanAreas = [
@@ -84,9 +96,6 @@
                 var form = document.getElementById('locationForm');
                 form.submit();
             });
-
-            // Add the Geocoder control to the map
-            L.Control.geocoder().addTo(mymap);
         }
     </script>
 </body>
