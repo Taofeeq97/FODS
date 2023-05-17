@@ -8,8 +8,6 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.db.models import Q
-from django.contrib.sessions.backends.db import SessionStore
-from django.contrib.sessions.models import Session
 from accounts.models import DeliveryPerson
 from .forms import (
     DeliveryEntityForm, TagForm, OptionalItemForm, FoodCreateForm
@@ -19,6 +17,7 @@ from .models import (
     OngoingOrder, Tag, OptionalItem, OrderedOptionalItem
 )
 from .documents import FoodDocument
+from .session import _session_id
 
 
 # Create your views here.
@@ -27,23 +26,6 @@ from .documents import FoodDocument
 class AdminRequiredMixin(UserPassesTestMixin):
     def test_func(self):
         return self.request.user.is_superuser
-
-
-# class FoodListView(generic.ListView):
-#     model = Food
-#     template_name = 'orders/foods.html'
-#     context_object_name = 'foods'
-#     queryset = Food.active_objects.all()
-#
-#     def get_queryset(self):
-#         queryset = super().get_queryset()
-#         search_query = self.request.GET.get('search_query')
-#         if search_query:
-#             search = FoodDocument.search().query("match", name=search_query)
-#             results = search.execute()
-#             food_ids = [hit.meta.id for hit in results]
-#             queryset = queryset.filter(id__in=food_ids)
-#         return queryset
 
 
 class FoodListView(generic.ListView):
@@ -56,17 +38,28 @@ class FoodListView(generic.ListView):
         queryset = super().get_queryset()
         search_query = self.request.GET.get('search_query')
         if search_query:
-            queryset = queryset.filter(
-                Q(name__icontains=search_query)
-            )
+            search = FoodDocument.search().query("match", name=search_query)
+            results = search.execute()
+            food_ids = [hit.meta.id for hit in results]
+            queryset = queryset.filter(id__in=food_ids)
         return queryset
 
 
-def _session_id(request):
-    session_id = request.session.session_key
-    if not session_id:
-        session_id = request.session.create()
-    return session_id
+# class FoodListView(generic.ListView):
+#     model = Food
+#     template_name = 'orders/foods.html'
+#     context_object_name = 'foods'
+#     queryset = Food.active_objects.all()
+#
+#     def get_queryset(self):
+#         queryset = super().get_queryset()
+#         search_query = self.request.GET.get('search_query')
+#         if search_query:
+#             queryset = queryset.filter(
+#                 Q(name__icontains=search_query)
+#             )
+#         return queryset
+
 
 def detail_view(request, pk):
     if request.method == 'POST':
