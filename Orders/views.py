@@ -33,23 +33,6 @@ class AdminRequiredMixin(UserPassesTestMixin):
         return self.request.user.is_superuser
 
 
-class FoodListView(generic.ListView):
-    model = Food
-    template_name = 'orders/foods.html'
-    context_object_name = 'foods'
-    queryset = Food.active_objects.all()
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        search_query = self.request.GET.get('search_query')
-        if search_query:
-            search = FoodDocument.search().query("match", name=search_query)
-            results = search.execute()
-            food_ids = [hit.meta.id for hit in results]
-            queryset = queryset.filter(id__in=food_ids)
-        return queryset
-
-
 # class FoodListView(generic.ListView):
 #     model = Food
 #     template_name = 'orders/foods.html'
@@ -60,10 +43,27 @@ class FoodListView(generic.ListView):
 #         queryset = super().get_queryset()
 #         search_query = self.request.GET.get('search_query')
 #         if search_query:
-#             queryset = queryset.filter(
-#                 Q(name__icontains=search_query)
-#             )
+#             search = FoodDocument.search().query("match", name=search_query)
+#             results = search.execute()
+#             food_ids = [hit.meta.id for hit in results]
+#             queryset = queryset.filter(id__in=food_ids)
 #         return queryset
+
+
+class FoodListView(generic.ListView):
+    model = Food
+    template_name = 'orders/foods.html'
+    context_object_name = 'foods'
+    queryset = Food.active_objects.all()
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search_query')
+        if search_query:
+            queryset = queryset.filter(
+                Q(name__icontains=search_query)
+            )
+        return queryset
 
 
 def detail_view(request, pk):
