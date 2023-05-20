@@ -122,7 +122,6 @@ def detail_view(request, pk):
                 selected_cart.ordered_food.add(ordered_food)
                 messages.success(request, f'{ordered_food} successfully added')
                 return redirect('cart')
-
             new_cart = FoodCart.objects.create(user=request.user.customer)
             new_cart.ordered_food.add(ordered_food)
             new_cart.save()
@@ -132,7 +131,6 @@ def detail_view(request, pk):
         else:
             selected_cart = FoodCart.objects.filter(session_id=unauthenticated_user_session_id(request),
                                                     is_checked_out=False).first()
-
             if selected_cart is not None:
                 existing_ordered_food = selected_cart.ordered_food.filter(food=ordered_food.food).first()
                 if existing_ordered_food is not None:
@@ -162,10 +160,8 @@ def detail_view(request, pk):
                 messages.success(request, f'{ordered_food} successfully added to your cart')
 
             return redirect('cart')
-
-
     else:
-        food = Food.objects.get(id=pk)
+        food = get_object_or_404(Food, id=pk)
         optional_items = OptionalItem.objects.filter(foods=food)
         return render(request, 'orders/single-food.html', {'single_food': food, 'optional_items': optional_items})
 
@@ -250,7 +246,7 @@ class DeliveryView(View):
     def post(self, request, *args, **kwargs):
         phone_number = request.POST.get('phone_number')
         address = request.GET.get('address')
-        state=address.split(',')[-2].lower()
+        state = address.split(',')[-2].lower()
         print(state)
         if state != ' oyo state':
             messages.error(request, 'Sorry, we do not deliver outside of Oyo State.')
@@ -505,4 +501,3 @@ def save_location(request, cart_id):
     else:
         context = {'cart_id': cart_id}
         return render(request, 'orders/map.html', context)
-
