@@ -33,23 +33,6 @@ class AdminRequiredMixin(UserPassesTestMixin):
         return self.request.user.is_superuser
 
 
-# class FoodListView(generic.ListView):
-#     model = Food
-#     template_name = 'orders/foods.html'
-#     context_object_name = 'foods'
-#     queryset = Food.active_objects.all()
-#
-#     def get_queryset(self):
-#         queryset = super().get_queryset()
-#         search_query = self.request.GET.get('search_query')
-#         if search_query:
-#             search = FoodDocument.search().query("match", name=search_query)
-#             results = search.execute()
-#             food_ids = [hit.meta.id for hit in results]
-#             queryset = queryset.filter(id__in=food_ids)
-#         return queryset
-
-
 class FoodListView(generic.ListView):
     model = Food
     template_name = 'orders/foods.html'
@@ -60,10 +43,27 @@ class FoodListView(generic.ListView):
         queryset = super().get_queryset()
         search_query = self.request.GET.get('search_query')
         if search_query:
-            queryset = queryset.filter(
-                Q(name__icontains=search_query)
-            )
+            search = FoodDocument.search().query("match", name=search_query)
+            results = search.execute()
+            food_ids = [hit.meta.id for hit in results]
+            queryset = queryset.filter(id__in=food_ids)
         return queryset
+
+
+# class FoodListView(generic.ListView):
+#     model = Food
+#     template_name = 'orders/foods.html'
+#     context_object_name = 'foods'
+#     queryset = Food.active_objects.all()
+#
+#     def get_queryset(self):
+#         queryset = super().get_queryset()
+#         search_query = self.request.GET.get('search_query')
+#         if search_query:
+#             queryset = queryset.filter(
+#                 Q(name__icontains=search_query)
+#             )
+#         return queryset
 
 
 def detail_view(request, pk):
@@ -178,8 +178,7 @@ class CartView(generic.TemplateView):
         context = super().get_context_data(**kwargs)
 
         if self.request.user.is_authenticated:
-            user = self.request.user.customer
-            cart = FoodCart.objects.filter(user=user, is_checked_out=False).first()
+            cart = FoodCart.objects.filter(user=self.request.user.customer, is_checked_out=False).first()
         else:
             cart = FoodCart.objects.filter(session_id=unauthenticated_user_session_id(self.request),
                                            is_checked_out=False).first()
@@ -226,8 +225,7 @@ class CartView(generic.TemplateView):
 class RemoveFoodCartItemView(View):
     def get(self, request, food_id, cart_id):
         if request.user.is_authenticated:
-            user = request.user.customer
-            cart = FoodCart.objects.filter(user=user, id=cart_id).first()
+            cart = FoodCart.objects.filter(user=request.user.customer, id=cart_id).first()
         else:
             cart = FoodCart.objects.filter(session_id=unauthenticated_user_session_id(self.request), id=cart_id).first()
 
@@ -255,7 +253,7 @@ class DeliveryView(View):
         state=address.split(',')[-2].lower()
         print(state)
         if state != ' oyo state':
-            messages.error(request, 'Sorry, we do not deliver outside of Ibadan.')
+            messages.error(request, 'Sorry, we do not deliver outside of Oyo State.')
             return redirect('cart')
         if request.user.is_authenticated:
             delivery_entity = DeliveryEntity.objects.create(
@@ -349,7 +347,7 @@ class UserDashboardView(View):
             delivery_entity.accept_delivery = True
             delivery_entity.is_active = False
             delivery_entity.save()
-            messages.success(request, f'Order for {delivery_entity.food_cart} has been accepted.')
+            messages.success(request, f'You have Accepted the order for {delivery_entity.food_cart}.')
         else:
             messages.error(request, 'Cannot accept delivery entity at this time.')
         return redirect('user-dashboard')
@@ -498,15 +496,12 @@ class CancelOrderView(AdminRequiredMixin, View):
         return redirect('ongoing_orders')
 
 
-from django.shortcuts import redirect, reverse
-
 def save_location(request, cart_id):
     if request.method == 'POST':
         location = request.POST.get('location')
         latitude, longitude = location.split(', ')
         address = get_address(latitude, longitude)
         return redirect(reverse('delivery', args=[cart_id]) + f'?address={address}')
-
     else:
         context = {'cart_id': cart_id}
         return render(request, 'orders/map.html', context)
